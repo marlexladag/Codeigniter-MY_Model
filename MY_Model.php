@@ -6,6 +6,10 @@ class MY_Model extends CI_Model
     const DB_TABLE = 'abstract';
     const DB_TABLE_PK = 'abstract';
     
+    /**
+     * Setting ID
+     * @param int $id
+     */
     public function setID($id = 0)
     {
         if ((int) $id != 0) {
@@ -15,19 +19,28 @@ class MY_Model extends CI_Model
         return $this;
     }
 
+    /**
+     * Get ID from the database model
+     * @return int id model
+     */
     public function getID()
     {
         return $this->{$this::DB_TABLE_PK};
     }
-
+    
     /**
-     * Create record.
+     * Insert 1 record.
      */
     private function insert()
     {
         $this->db->insert($this::DB_TABLE, $this->htmlEscape($this));
         return $this->{$this::DB_TABLE_PK} = $this->db->insert_id();
     }
+    
+    /**
+     * Insert multiple records.
+     * @param array $datas
+     */
     private function insert_batch($datas = array())
     {
         if (!empty($datas)) {
@@ -41,7 +54,6 @@ class MY_Model extends CI_Model
         foreach ($data as $key => $value) {
             if (is_array($value)) {
                 $val = $this->htmlEscape($value);
-                // $val = json_encode($value);
             } else {
                 if ($key == "slug") {
                     $val = url_title(strtolower($value), '-', true);
@@ -69,7 +81,6 @@ class MY_Model extends CI_Model
             if (!is_null($value)) {
                 
                 if (is_array($value)) {
-                    // $this->htmlEscape($value);
                     $upd[$key] = json_encode($value);
                 } else {
                     if ($key == "slug") {
@@ -105,18 +116,18 @@ class MY_Model extends CI_Model
     
     /**
      * Load from the database.
-     * @param int $id
+     * @param string $p
      */
-    public function search($whr = "", $wht = "")
+    public function search($p = "", $wht = "")
     {
         if ($wht == "") {
-            $this->db->like($whr);
+            $this->db->like($p);
         } elseif ($wht == "or") {
-            $this->db->or_like($whr);
+            $this->db->or_like($p);
         } elseif ($wht == "ornot") {
-            $this->db->or_not_like($whr);
+            $this->db->or_not_like($p);
         } elseif ($wht == "not") {
-            $this->db->not_like($whr);
+            $this->db->not_like($p);
         }
         
         $query = $this->db->get($this::DB_TABLE);
@@ -126,16 +137,16 @@ class MY_Model extends CI_Model
     
     /**
      * Load from the database.
-     * @param int $id
+     * @param array $param
      */
 
-    public function load($p = array())
+    public function load($param = array())
     {
-        $select = isset($p['select']) ? $p['select'] : '';
-        $join = isset($p['join']) ? $p['join'] : '';
-        $order = isset($p['order']) ? $p['order'] : '';
-        $id = isset($p['id']) ? $p['id'] : '';
-        $where_not_in = isset($p['where_not_in']) ? $p['where_not_in'] : '';
+        $select = isset($param['select']) ? $param['select'] : '';
+        $join = isset($param['join']) ? $param['join'] : '';
+        $order = isset($param['order']) ? $param['order'] : '';
+        $id = isset($param['id']) ? $param['id'] : '';
+        $where_not_in = isset($param['where_not_in']) ? $param['where_not_in'] : '';
 
         if (is_array($order) && count($order)>1) {
             foreach ($order as $key => $value) {
@@ -215,7 +226,7 @@ class MY_Model extends CI_Model
     /**
      * Save the record.
      */
-    public function save($whr = array(), $batch = false)
+    public function save($param = array(), $batch = false)
     {
         if (isset($this->{$this::DB_TABLE_PK})) {
             return $this->update();
@@ -223,7 +234,7 @@ class MY_Model extends CI_Model
             if (!$batch) {
                 return $this->insert();
             } else {
-                return $this->insert_batch($whr);
+                return $this->insert_batch($param);
             }
         }
     }
