@@ -111,6 +111,9 @@ class MY_Model extends CI_Model
                 $this->$key = strip_tags($value);
             }
         }
+        
+        unset($this);
+
         return $row;
     }
     
@@ -181,19 +184,17 @@ class MY_Model extends CI_Model
             }
         }
         
-        
         if (!empty($select)) {
             $this->db->select($select);
         }        
+        
 
-        if (is_array($id)) {
-            $whr = $id;
-            $query = $this->db->get_where($this::DB_TABLE, $whr);
+        if (!empty($this->htmlEscape($this))) {
+            $query = $this->db->get_where($this::DB_TABLE, $this->htmlEscape($this));
         } elseif ($id != "") {
             $whr = array($this::DB_TABLE_PK => $id);
             $query = $this->db->get_where($this::DB_TABLE, $whr);
         } else {
-            $whr = "";
             $query = $this->db->get_where($this::DB_TABLE);
         }
         return $this->populate($query->result());
